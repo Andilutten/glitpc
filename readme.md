@@ -8,10 +8,9 @@ them down into a file with all source targets extracted out.
 This is just a project i made for my own use.
 
 ## Installation
-If you have a golang binary installed on your computer and GOPATH+GOBIN setup, just run the following commands
+If you have a golang binary installed on your computer and GOPATH+GOBIN setup, just run the following 
 ```bash
 go get github.com/Andilutten/glitpc
-go install github.com/Andilutten/glitpc
 ```
 
 ## Usage
