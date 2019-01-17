@@ -105,7 +105,7 @@ func Test_compile(t *testing.T) {
 	}
 	for _, tC := range testCases {
 		buffer := new(bytes.Buffer)
-		if err := compile(buffer, tC.options, tC.input); err != nil {
+		if err := Compile(buffer, tC.options, tC.input); err != nil {
 			t.Fatal(err.Error())
 		} else {
 			if buffer.String() != tC.output {
