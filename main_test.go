@@ -37,80 +37,83 @@ func createTestFile(contents ...string) *file {
 	return &file{strings.Join(contents, "\n"), 0}
 }
 
+var options = Options{
+	Stdin:    false,
+	Language: "bash",
+	Output:   "file.sh",
+}
+var compileTestCases = []testCase{
+	{
+		desc:    "No output",
+		options: options,
+		input: []io.Reader{
+			createTestFile("Hello World"),
+		},
+		output: "",
+	},
+	{
+		desc:    "One insertion",
+		options: options,
+		input: []io.Reader{
+			createTestFile(
+				"# Hello world",
+				"This is a markdown file",
+				"```bash",
+				"export FOO=BAR",
+				"```",
+			),
+		},
+		output: "export FOO=BAR\n",
+	},
+	{
+		desc:    "More insertions",
+		options: options,
+		input: []io.Reader{
+			createTestFile(
+				"# First",
+				"```bash",
+				"export FOO=BAR",
+				"```",
+				"# Second",
+				"```bash",
+				"export BAR=FOO",
+				"```",
+			),
+		},
+		output: "export FOO=BAR\nexport BAR=FOO\n",
+	},
+	{
+		desc:    "Multiple files",
+		options: options,
+		input: []io.Reader{
+			createTestFile(
+				"# First",
+				"```bash",
+				"export FOO=BAR",
+				"```",
+			),
+			createTestFile(
+				"# Second",
+				"```bash",
+				"export BAR=FOO",
+				"```",
+			),
+		},
+		output: "export FOO=BAR\nexport BAR=FOO\n",
+	},
+}
+
 func Test_compile(t *testing.T) {
-	options := Options{
-		Stdin:    false,
-		Language: "bash",
-		Output:   "file.sh",
-	}
-	testCases := []testCase{
-		{
-			desc:    "No output",
-			options: options,
-			input: []io.Reader{
-				createTestFile("Hello World"),
-			},
-			output: "",
-		},
-		{
-			desc:    "One insertion",
-			options: options,
-			input: []io.Reader{
-				createTestFile(
-					"# Hello world",
-					"This is a markdown file",
-					"```bash",
-					"export FOO=BAR",
-					"```",
-				),
-			},
-			output: "export FOO=BAR\n",
-		},
-		{
-			desc:    "More insertions",
-			options: options,
-			input: []io.Reader{
-				createTestFile(
-					"# First",
-					"```bash",
-					"export FOO=BAR",
-					"```",
-					"# Second",
-					"```bash",
-					"export BAR=FOO",
-					"```",
-				),
-			},
-			output: "export FOO=BAR\nexport BAR=FOO\n",
-		},
-		{
-			desc:    "Multiple files",
-			options: options,
-			input: []io.Reader{
-				createTestFile(
-					"# First",
-					"```bash",
-					"export FOO=BAR",
-					"```",
-				),
-				createTestFile(
-					"# Second",
-					"```bash",
-					"export BAR=FOO",
-					"```",
-				),
-			},
-			output: "export FOO=BAR\nexport BAR=FOO\n",
-		},
-	}
-	for _, tC := range testCases {
-		buffer := new(bytes.Buffer)
-		if err := Compile(buffer, tC.options, tC.input); err != nil {
-			t.Fatal(err.Error())
-		} else {
-			if buffer.String() != tC.output {
-				t.Fatalf("Got \"%s\" expected \"%s\"", buffer.String(), tC.output)
+	for _, tC := range compileTestCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			buffer := new(bytes.Buffer)
+			if err := Compile(buffer, tC.options, tC.input); err != nil {
+				t.Fatal(err.Error())
+			} else {
+				if buffer.String() != tC.output {
+					t.Fatalf("Got \"%s\" expected \"%s\"", buffer.String(), tC.output)
+				}
 			}
-		}
+		})
 	}
 }
