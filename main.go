@@ -26,7 +26,7 @@ func Check(err error, message string) {
 
 // Compile takes the inputs and reads extracts all of the
 // source blocks that should be grabbed from the sources
-func Compile(target io.Writer, opts Options, input []io.Reader) error {
+func Compile(output io.Writer, opts Options, input []io.Reader) error {
 	// Create a regexp for the block pattern
 	re := regexp.MustCompile(fmt.Sprintf(BlockPatternTemplate, opts.Language))
 	for _, reader := range input {
@@ -39,7 +39,7 @@ func Compile(target io.Writer, opts Options, input []io.Reader) error {
 		for _, match := range re.FindAllSubmatch(buffer.Bytes(), -1) {
 			// Read from all submatches
 			for _, submatch := range match[1:] {
-				fmt.Fprint(target, string(submatch))
+				fmt.Fprint(output, string(submatch))
 			}
 		}
 	}
